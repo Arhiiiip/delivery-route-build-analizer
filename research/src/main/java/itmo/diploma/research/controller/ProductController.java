@@ -1,9 +1,11 @@
 package itmo.diploma.research.controller;
 
 import itmo.diploma.research.dto.request.ProductSearchRequest;
-import itmo.diploma.research.entity.ProductInfo;
+import itmo.diploma.research.entity.Product;
 import itmo.diploma.research.service.ProductSearchService;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -17,7 +19,7 @@ public class ProductController {
     }
 
     @PostMapping("/search")
-    public List<ProductInfo> searchProducts(@RequestBody ProductSearchRequest request) {
+    public List<Product> searchProducts(@RequestBody ProductSearchRequest request) throws IOException, InterruptedException {
         return productSearchService.searchProducts(request);
     }
 }
