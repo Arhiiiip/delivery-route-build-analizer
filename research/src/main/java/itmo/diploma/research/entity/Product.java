@@ -13,7 +13,7 @@ import java.beans.ConstructorProperties;
 @Setter
 public class Product {
     private String name;
-    private Double price;
+    private String price;
     private String url;
 
     @Override

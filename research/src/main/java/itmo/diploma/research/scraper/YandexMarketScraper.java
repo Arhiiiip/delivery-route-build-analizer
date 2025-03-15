@@ -24,22 +24,21 @@ public class YandexMarketScraper {
 
         Elements productContainers = document.select("div.serverList-item");
 
-        for (Element container : productContainers) {
-            Elements productElements = container.select("div[data-cs-name='snippet-card']");
+        for (Element product : productContainers) {
+            Element link = product.select("a[href]").first();
+            if (link != null) {
+                String href = link.attr("href");
 
-            for (Element productElement : productElements) {
-                String name = productElement.select("a.EQlfk span[data-auto='snippet-title']").text();
+                String productName = link.select("span").text();
 
-                String priceText = productElement.select("span[data-autotest-value]").text();
-                priceText = priceText.replaceAll("[^\\d.]", "");
-                Double price = priceText.isEmpty() ? null : Double.parseDouble(priceText);
+                String price = product.select("span.ds-text_color_price-term").text();
 
-                String productUrl = productElement.select("a.EQlfk").attr("href");
-
-                if (price != null && (request.getMinPrice() == null || price >= request.getMinPrice()) &&
-                        (request.getMaxPrice() == null || price <= request.getMaxPrice())) {
-                    products.add(new Product(name, price, "https://market.yandex.ru" + productUrl));
-                }
+                Product newProduct = new Product(productName, price, href);
+                products.add(newProduct);
+                System.out.println("Product Name: " + productName);
+                System.out.println("Href: " + href);
+                System.out.println("Price: " + price);
+                System.out.println();
             }
         }
 
