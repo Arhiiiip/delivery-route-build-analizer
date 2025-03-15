@@ -15,7 +15,7 @@ public class ProductSearchService {
     YandexMarketScraper scraper = new YandexMarketScraper();
 
 
-    public List<Product> searchProducts(ProductSearchRequest query) throws IOException, InterruptedException {
+    public List<Product> searchProducts(ProductSearchRequest query) throws IOException {
         List<Product> results = new ArrayList<>();
 
         results.addAll(searchYandex(query));
@@ -23,7 +23,7 @@ public class ProductSearchService {
         return results;
     }
 
-    private List<Product> searchYandex(ProductSearchRequest query) throws IOException, InterruptedException {
+    private List<Product> searchYandex(ProductSearchRequest query) throws IOException {
         return scraper.scrapeProducts(query);
     }
 }

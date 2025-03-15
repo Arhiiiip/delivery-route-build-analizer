@@ -1,14 +1,18 @@
 package itmo.diploma.research.dto.request;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
+@Getter
+@Setter
 public class ProductSearchRequest {
     private String query;
     private Double minPrice;
     private Double maxPrice;
 
-    public ProductSearchRequest(String query, String category, String brand, Double minPrice, Double maxPrice, String country, String language, String sort, Integer limit) {
+    public ProductSearchRequest(String query, Double minPrice, Double maxPrice) {
         this.query = query;
         this.minPrice = minPrice;
         this.maxPrice = maxPrice;
