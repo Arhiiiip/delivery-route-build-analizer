@@ -1,5 +1,8 @@
 package itmo.diploma.general.controller;
 
+import itmo.diploma.general.dto.request.AnalizeRequest;
+import itmo.diploma.general.entity.Product;
+import itmo.diploma.general.service.CurrencyConversionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,12 +18,12 @@ public class GeneralController {
     private final CurrencyConversionService currencyConversionService;
 
     @Autowired
-    public CurrencyController(CurrencyConversionService currencyConversionService) {
+    public GeneralController(CurrencyConversionService currencyConversionService) {
         this.currencyConversionService = currencyConversionService;
     }
 
     @PostMapping("/convert")
-    public List<Product> convertAndSearch(@RequestBody PriceRequest request) {
+    public List<Product> convertAndSearch(@RequestBody AnalizeRequest request) {
         return currencyConversionService.processPriceRequest(request);
     }
 }

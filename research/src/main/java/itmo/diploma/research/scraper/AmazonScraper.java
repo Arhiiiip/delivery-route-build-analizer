@@ -1,6 +1,7 @@
 package itmo.diploma.research.scraper;
 
 import itmo.diploma.research.dto.request.ProductSearchRequest;
+import itmo.diploma.research.entity.Currency;
 import itmo.diploma.research.entity.Product;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -45,7 +46,7 @@ public class AmazonScraper {
                     price = price.split("\\$")[1].split(" ")[0];
                 }
 
-                Product newProduct = new Product(productName, price, href);
+                Product newProduct = new Product(productName, price, Currency.USD, href);
                 products.add(newProduct);
             }
         }
@@ -56,11 +57,11 @@ public class AmazonScraper {
         StringBuilder url = new StringBuilder("https://www.amazon.com/s?k=");
         url.append(request.getQuery().replace(" ", "+"));
 
-        if (request.getMinPrice() != null) {
-            url.append("&low-price=").append(request.getMinPrice());
+        if (request.getMinPriceUsd() != 0) {
+            url.append("&low-price=").append(request.getMinPriceUsd());
         }
-        if (request.getMaxPrice() != null) {
-            url.append("&high-price=").append(request.getMaxPrice());
+        if (request.getMaxPriceUsd() != 0) {
+            url.append("&high-price=").append(request.getMaxPriceUsd());
         }
 
         return url.toString();

@@ -14,13 +14,14 @@ import java.beans.ConstructorProperties;
 public class Product {
     private String name;
     private String price;
+    private Currency currency;
     private String url;
 
     @Override
     public String toString() {
         return "Product{" +
                 "name='" + name + '\'' +
-                ", price=" + price +
+                ", price=" + price + currency +
                 ", url='" + url + '\'' +
                 '}';
     }

@@ -1,6 +1,6 @@
 package itmo.diploma.general.dto.request;
 
-class ProductSearchRequest {
+public class ProductSearchRequest {
     private String query;
     private String minPrice;
     private String maxPrice;

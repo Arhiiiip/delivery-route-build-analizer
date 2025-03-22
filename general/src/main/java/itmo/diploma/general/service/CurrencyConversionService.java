@@ -1,7 +1,9 @@
 package itmo.diploma.general.service;
 
+import itmo.diploma.general.dto.request.AnalizeRequest;
 import itmo.diploma.general.dto.request.ConvertedPriceRequest;
 import itmo.diploma.general.dto.request.ProductSearchRequest;
+import itmo.diploma.general.entity.Currency;
 import itmo.diploma.general.entity.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,24 +23,22 @@ public class CurrencyConversionService {
         this.restTemplate = restTemplate;
     }
 
-    public List<Product> processPriceRequest(PriceRequest request) {
+    public List<Product> processPriceRequest(AnalizeRequest request) {
         ConvertedPriceRequest convertedRequest = convertPrices(request);
 
-        // Отправляем запрос в ProductController
-        String productServiceUrl = "http://localhost:8080/api/products/search";
+        String productServiceUrl = "http://localhost:8081/api/products/search";
         ProductSearchRequest productSearchRequest = new ProductSearchRequest(
                 convertedRequest.getQuery(),
-                String.valueOf(convertedRequest.getMinPriceUsd()), // Предполагаем, что сервис принимает USD
+                String.valueOf(convertedRequest.getMinPriceUsd()),
                 String.valueOf(convertedRequest.getMaxPriceUsd())
         );
 
         List<Product> products = restTemplate.postForObject(productServiceUrl, productSearchRequest, List.class);
 
-        // Здесь можно продолжить работу с ответом
         return products;
     }
 
-    private ConvertedPriceRequest convertPrices(PriceRequest request) {
+    private ConvertedPriceRequest convertPrices(AnalizeRequest request) {
         ConvertedPriceRequest converted = new ConvertedPriceRequest();
         converted.setQuery(request.getQuery());
 
@@ -46,7 +46,6 @@ public class CurrencyConversionService {
         double minPrice = request.getMinPrice();
         double maxPrice = request.getMaxPrice();
 
-        // Конвертация в USD и RUB
         if (inputCurrency == Currency.USD) {
             converted.setMinPriceUsd(minPrice);
             converted.setMaxPriceUsd(maxPrice);

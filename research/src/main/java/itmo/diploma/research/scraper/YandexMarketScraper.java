@@ -1,6 +1,7 @@
 package itmo.diploma.research.scraper;
 
 import itmo.diploma.research.dto.request.ProductSearchRequest;
+import itmo.diploma.research.entity.Currency;
 import itmo.diploma.research.entity.Product;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -38,7 +39,7 @@ public class YandexMarketScraper {
                     continue;
                 }
 
-                Product newProduct = new Product(productName, price, href);
+                Product newProduct = new Product(productName, price, Currency.RUB, href);
                 products.add(newProduct);
             }
         }
@@ -49,11 +50,11 @@ public class YandexMarketScraper {
         StringBuilder url = new StringBuilder("https://market.yandex.ru/search?text=");
         url.append(request.getQuery().replace(" ", "+"));
 
-        if (request.getMinPrice() != null) {
-            url.append("&pricefrom=").append(request.getMinPrice());
+        if (request.getMinPriceRub() != 0) {
+            url.append("&pricefrom=").append(request.getMinPriceRub());
         }
-        if (request.getMaxPrice() != null) {
-            url.append("&priceto=").append(request.getMaxPrice());
+        if (request.getMaxPriceRub() != 0) {
+            url.append("&priceto=").append(request.getMaxPriceRub());
         }
 
         return url.toString();
