@@ -1,39 +1,54 @@
 package itmo.diploma.general.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import itmo.diploma.general.dto.request.AnalizeRequest;
 import itmo.diploma.general.dto.request.ConvertedPriceRequest;
-import itmo.diploma.general.dto.request.ProductSearchRequest;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse.BodyHandlers;
+import java.util.List;
+
 import itmo.diploma.general.entity.Currency;
 import itmo.diploma.general.entity.Product;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
 
 @Service
 public class CurrencyConversionService {
 
+    @Value("${api.products.search.url}")
+    private String API_URL;
+    private final ObjectMapper objectMapper;
     private final ExchangeRateService exchangeRateService;
-    private final RestTemplate restTemplate;
 
     @Autowired
     public CurrencyConversionService(ExchangeRateService exchangeRateService, RestTemplate restTemplate) {
         this.exchangeRateService = exchangeRateService;
-        this.restTemplate = restTemplate;
+        this.objectMapper = new ObjectMapper();
+
     }
 
-    public List<Product> processPriceRequest(AnalizeRequest request) {
+    public List<Product> processPriceRequest(AnalizeRequest request) throws IOException, InterruptedException {
         ConvertedPriceRequest convertedRequest = convertPrices(request);
 
-        String productServiceUrl = "http://localhost:8081/api/products/search";
-        ProductSearchRequest productSearchRequest = new ProductSearchRequest(
-                convertedRequest.getQuery(),
-                String.valueOf(convertedRequest.getMinPriceUsd()),
-                String.valueOf(convertedRequest.getMaxPriceUsd())
-        );
+        String jsonRequest = objectMapper.writeValueAsString(convertedRequest);
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(API_URL))
+                .header("Content-Type", "application/json")
+                .POST(BodyPublishers.ofString(jsonRequest))
+                .build();
 
-        List<Product> products = restTemplate.postForObject(productServiceUrl, productSearchRequest, List.class);
+        HttpResponse<String> response = client.send(httpRequest, BodyHandlers.ofString());
+
+        List<Product> products = objectMapper.readValue(response.body(), objectMapper.getTypeFactory().constructCollectionType(List.class, Product.class));
 
         return products;
     }
