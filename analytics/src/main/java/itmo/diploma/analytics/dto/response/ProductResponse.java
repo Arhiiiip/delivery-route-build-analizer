@@ -1,6 +1,7 @@
 package itmo.diploma.analytics.dto.response;
 
 import itmo.diploma.analytics.entity.Product;
+import itmo.diploma.analytics.entity.ProductRecommendation;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,5 @@ public class ProductResponse {
     private double estimatedCost;
     private int estimatedDays;
     private String recommendationReason;
-
-    // Конструкторы, геттеры и сеттеры
+    private List<ProductRecommendation> recommendations;
 }

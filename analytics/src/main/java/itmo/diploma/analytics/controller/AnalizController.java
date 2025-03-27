@@ -1,6 +1,7 @@
 package itmo.diploma.analytics.controller;
 
 import itmo.diploma.analytics.dto.request.ProductRequest;
+import itmo.diploma.analytics.dto.response.ProductResponse;
 import itmo.diploma.analytics.service.NeuralNetworkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +19,9 @@ public class AnalizController {
     }
 
     @PostMapping("/recommend")
-    public ResponseEntity<ProductRequest> getRecommendations(@RequestBody ProductRequest request) {
+    public ResponseEntity<ProductResponse> getRecommendations(@RequestBody ProductRequest request) {
         try {
-            ProductRequest response = neuralNetworkService.analyzeProducts(request);
+            ProductResponse response = neuralNetworkService.analyzeProducts(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

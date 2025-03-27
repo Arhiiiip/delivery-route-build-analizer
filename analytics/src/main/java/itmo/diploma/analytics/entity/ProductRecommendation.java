@@ -17,5 +17,5 @@ public class ProductRecommendation {
     private double estimatedCost;
     private int estimatedDays;
     private String recommendationReason;
-    private double score; // Оценка от нейросети
+    private double score;
 }

@@ -16,6 +16,4 @@ import java.util.List;
 public class ProductRequest {
     private List<Product> products;
     private String userRequirement;
-    private String destinationCountry;
-    private List<ProductRecommendation> recommendations; // Добавляем рекомендации
 }

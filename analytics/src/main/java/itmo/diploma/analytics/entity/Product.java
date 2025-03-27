@@ -12,6 +12,6 @@ public class Product {
     private String name;
     private double price;
     private String url;
-    private String sourceCountry;
+    private String originCountry;
     private String destinationCountry;
 }
