@@ -20,7 +20,7 @@ torch.onnx.export(
         "attention_mask": {0: "batch_size", 1: "sequence_length"},
         "output": {0: "batch_size"}
     },
-    opset_version=11
+    opset_version=14
 )
 
 print("Модель конвертирована в ONNX!")
