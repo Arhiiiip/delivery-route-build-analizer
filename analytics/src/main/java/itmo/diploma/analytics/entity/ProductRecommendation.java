@@ -1,18 +1,14 @@
 package itmo.diploma.analytics.entity;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @Data
 @Getter
 @Setter
-@Builder
+@NoArgsConstructor
 public class ProductRecommendation {
-    private Product product;
     private List<String> deliveryRoute;
     private double estimatedCost;
     private int estimatedDays;

@@ -44,10 +44,8 @@ dependencies {
     // Deeplearning4j NLP
     implementation 'org.deeplearning4j:deeplearning4j-nlp:1.0.0-M2.1'
 
-    // ND4J Native Backend (для macOS)
     implementation 'org.nd4j:nd4j-native-platform:1.0.0-M2.1'
 
-    implementation 'org.deeplearning4j:deeplearning4j-modelimport:1.0.0-M2.1'
 
     implementation 'org.datavec:datavec-api:1.0.0-M2.1'
     implementation 'org.slf4j:slf4j-api:2.0.9'
