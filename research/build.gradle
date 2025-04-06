@@ -38,6 +38,12 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	// OkHttp
+	implementation 'com.squareup.okhttp3:okhttp:4.9.3' // или последняя версия
+
+	// JSON (org.json)
+	implementation 'org.json:json:20210307'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

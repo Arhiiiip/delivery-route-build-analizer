@@ -1,56 +1,77 @@
 package itmo.diploma.research.scraper;
 
 import itmo.diploma.research.dto.request.ProductSearchRequest;
-import itmo.diploma.research.entity.Currency;
 import itmo.diploma.research.entity.Product;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import okhttp3.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
+
+import java.util.concurrent.TimeUnit;
+
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class GoogleShoppingScraper {
-
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    @Value("${googleshopping.password}")
+    public static String USERNAME;
+    @Value("${googleshopping.mail}")
+    public static String PASSWORD;
     private static final String BASE_URL = "https://www.google.com/shopping";
 
-    public List<Product> scrapeProducts(ProductSearchRequest request) throws IOException {
-        List<Product> products = new ArrayList<>();
+    public void scrapeProducts(ProductSearchRequest query) throws IOException, JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("source", "google_shopping_search");
+        jsonObject.put("domain", "com");
+        jsonObject.put("geo_location", "FR");
+        jsonObject.put("query", query.getQuery());
+        jsonObject.put("pages", 1);
+        jsonObject.put("parse", true);
+        jsonObject.put("context", new JSONArray()
+                .put(new JSONObject()
+                        .put("key", "sort_by")
+                        .put("value", "pd"))
+                .put(new JSONObject()
+                        .put("key", "min_price")
+                        .put("value", 20))
+        );
 
-        String url = buildSearchUrl(request);
+        Authenticator authenticator = (route, response) -> {
+            String credential = Credentials.basic(USERNAME, PASSWORD);
+            return response
+                    .request()
+                    .newBuilder()
+                    .header(AUTHORIZATION_HEADER, credential)
+                    .build();
+        };
 
-        Document document = Jsoup.connect(url)
-                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-                .header("Accept-Language", "en-GB,en;q=0.9")
-                .get();
+        var client = new OkHttpClient.Builder()
+                .authenticator(authenticator)
+                .followRedirects(false)
+                .followSslRedirects(false)
+                .readTimeout(180, TimeUnit.SECONDS)
+                .build();
 
-        Elements productContainers = document.select("div[role=\"button\"]");
+        var mediaType = MediaType.parse("application/json; charset=utf-8");
+        var body = RequestBody.create(jsonObject.toString(), mediaType);
+        var request = new Request.Builder()
+                .url("https://realtime.oxylabs.io/v1/queries")
+                .post(body)
+                .build();
 
-        for (Element product : productContainers) {
-            Element link = product.select("a[href]").first();
-            if (link != null) {
-                String href = BASE_URL + link.attr("href");
-
-                String productName = product.select("h3.tAxDx").text();
-
-                String price = product.select("span.a8Pemb").text();
-                if (!price.contains("€")) {
-                    price = product.select("span.a-price-whole").text() + ".";
-                    price += product.select("span.a-price-fraction").text();
-                    if (price == "" || price == null) {
-                        break;
-                    }
-                } else {
-                    price = price.split("€")[1].split(" ")[0];
+        try (var response = client.newCall(request).execute()) {
+            if (response.body() != null) {
+                try (var responseBody = response.body()) {
+                    System.out.println(responseBody.string());
                 }
-
-                Product newProduct = new Product(productName, price, Currency.EUR, href);
-                products.add(newProduct);
             }
+        } catch (Exception exception) {
+            System.out.println("Error: " + exception.getMessage());
         }
-        return products;
+
     }
 
     private String buildSearchUrl(ProductSearchRequest request) {

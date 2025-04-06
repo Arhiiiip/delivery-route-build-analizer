@@ -3,6 +3,7 @@ package itmo.diploma.research.controller;
 import itmo.diploma.research.dto.request.ProductSearchRequest;
 import itmo.diploma.research.entity.Product;
 import itmo.diploma.research.service.ProductSearchService;
+import org.json.JSONException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;

@@ -5,6 +5,7 @@ import itmo.diploma.research.entity.Product;
 import itmo.diploma.research.scraper.AmazonScraper;
 import itmo.diploma.research.scraper.GoogleShoppingScraper;
 import itmo.diploma.research.scraper.YandexMarketScraper;
+import org.json.JSONException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -19,12 +20,12 @@ public class ProductSearchService {
     GoogleShoppingScraper googleShoppingScraper = new GoogleShoppingScraper();
 
 
-    public List<Product> searchProducts(ProductSearchRequest query) throws IOException {
+    public List<Product> searchProducts(ProductSearchRequest query) throws IOException, JSONException {
         List<Product> results = new ArrayList<>();
 
-        results.addAll(searchYandex(query));
-        results.addAll(searchAmazon(query));
-        results.addAll(searchGoogle(query));
+//        results.addAll(searchYandex(query));
+//        results.addAll(searchAmazon(query));
+        searchGoogle(query);
 
         return results;
     }
@@ -37,7 +38,7 @@ public class ProductSearchService {
         return amazonScraper.scrapeProducts(query);
     }
 
-    private List<Product> searchGoogle(ProductSearchRequest query) throws IOException {
-        return googleShoppingScraper.scrapeProducts(query);
+    private void searchGoogle(ProductSearchRequest query) throws IOException, JSONException {
+        googleShoppingScraper.scrapeProducts(query);
     }
 }
