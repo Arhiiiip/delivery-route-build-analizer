@@ -1,90 +1,55 @@
 package itmo.diploma.research.scraper;
 
 import itmo.diploma.research.dto.request.ProductSearchRequest;
-import itmo.diploma.research.entity.Product;
-import okhttp3.*;
-import org.json.JSONArray;
+
 import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
-
-import java.util.concurrent.TimeUnit;
-
+import java.net.*;
+import java.io.*;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.List;
 
+@Service
 public class GoogleShoppingScraper {
-    private static final String AUTHORIZATION_HEADER = "Authorization";
-    @Value("${googleshopping.password}")
-    public static String USERNAME;
-    @Value("${googleshopping.mail}")
-    public static String PASSWORD;
-    private static final String BASE_URL = "https://www.google.com/shopping";
-
     public void scrapeProducts(ProductSearchRequest query) throws IOException, JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("source", "google_shopping_search");
-        jsonObject.put("domain", "com");
-        jsonObject.put("geo_location", "FR");
-        jsonObject.put("query", query.getQuery());
-        jsonObject.put("pages", 1);
-        jsonObject.put("parse", true);
-        jsonObject.put("context", new JSONArray()
-                .put(new JSONObject()
-                        .put("key", "sort_by")
-                        .put("value", "pd"))
-                .put(new JSONObject()
-                        .put("key", "min_price")
-                        .put("value", 20))
-        );
+        try {
+            String apiKey = "";
+            String country = "fr";
 
-        Authenticator authenticator = (route, response) -> {
-            String credential = Credentials.basic(USERNAME, PASSWORD);
-            return response
-                    .request()
-                    .newBuilder()
-                    .header(AUTHORIZATION_HEADER, credential)
-                    .build();
-        };
 
-        var client = new OkHttpClient.Builder()
-                .authenticator(authenticator)
-                .followRedirects(false)
-                .followSslRedirects(false)
-                .readTimeout(180, TimeUnit.SECONDS)
-                .build();
+            String apiUrl = "https://api.scrapingdog.com/google_shopping/?api_key=" + apiKey
+                    + "&query=" + query.getQuery()
+                    + "&country=" + country;
 
-        var mediaType = MediaType.parse("application/json; charset=utf-8");
-        var body = RequestBody.create(jsonObject.toString(), mediaType);
-        var request = new Request.Builder()
-                .url("https://realtime.oxylabs.io/v1/queries")
-                .post(body)
-                .build();
-
-        try (var response = client.newCall(request).execute()) {
-            if (response.body() != null) {
-                try (var responseBody = response.body()) {
-                    System.out.println(responseBody.string());
-                }
+            if (query.getMinPriceUsd() != 0) {
+                apiUrl += "&ppr_min=" + query.getMinPriceUsd();
             }
-        } catch (Exception exception) {
-            System.out.println("Error: " + exception.getMessage());
+            if (query.getMaxPriceUsd() != 0) {
+                apiUrl += "&ppr_max=" + query.getMaxPriceUsd();
+            }
+
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            int responseCode = connection.getResponseCode();
+
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+
+                while ((inputLine = reader.readLine()) != null) {
+                    response.append(inputLine);
+                }
+
+                reader.close();
+                System.out.println(response.toString());
+            } else {
+                System.out.println("HTTP request failed with response code: " + responseCode);
+            }
+            connection.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-    }
-
-    private String buildSearchUrl(ProductSearchRequest request) {
-        StringBuilder url = new StringBuilder("https://www.google.com/search?tbm=shop&q=");
-        url.append(request.getQuery().replace(" ", "+"));
-
-        if (request.getMinPriceUsd() != 0) {
-            url.append("&low-price=").append(request.getMinPriceUsd());
-        }
-        if (request.getMaxPriceUsd() != 0) {
-            url.append("&high-price=").append(request.getMaxPriceUsd());
-        }
-
-        return url.toString();
     }
 }

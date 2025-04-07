@@ -66,14 +66,20 @@ public class CurrencyConversionService {
             converted.setMaxPriceUsd(maxPrice);
             converted.setMinPriceRub(minPrice * exchangeRateService.getRate(Currency.USD, Currency.RUB));
             converted.setMaxPriceRub(maxPrice * exchangeRateService.getRate(Currency.USD, Currency.RUB));
+            converted.setMinPriceRub(minPrice * exchangeRateService.getRate(Currency.USD, Currency.EUR));
+            converted.setMaxPriceRub(maxPrice * exchangeRateService.getRate(Currency.USD, Currency.EUR));
         } else if (inputCurrency == Currency.RUB) {
             converted.setMinPriceRub(minPrice);
             converted.setMaxPriceRub(maxPrice);
             converted.setMinPriceUsd(minPrice * exchangeRateService.getRate(Currency.RUB, Currency.USD));
             converted.setMaxPriceUsd(maxPrice * exchangeRateService.getRate(Currency.RUB, Currency.USD));
+            converted.setMinPriceUsd(minPrice * exchangeRateService.getRate(Currency.RUB, Currency.EUR));
+            converted.setMaxPriceUsd(maxPrice * exchangeRateService.getRate(Currency.RUB, Currency.EUR));
         } else if (inputCurrency == Currency.EUR) {
             double usdRate = exchangeRateService.getRate(Currency.EUR, Currency.USD);
             double rubRate = exchangeRateService.getRate(Currency.EUR, Currency.RUB);
+            converted.setMinPriceEur(minPrice);
+            converted.setMaxPriceEur(maxPrice);
             converted.setMinPriceUsd(minPrice * usdRate);
             converted.setMaxPriceUsd(maxPrice * usdRate);
             converted.setMinPriceRub(minPrice * rubRate);
