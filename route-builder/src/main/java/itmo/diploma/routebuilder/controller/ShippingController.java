@@ -1,5 +1,7 @@
 package itmo.diploma.routebuilder.controller;
 
+import itmo.diploma.routebuilder.dto.request.ShippingRequest;
+import itmo.diploma.routebuilder.dto.response.ShippingResponse;
 import itmo.diploma.routebuilder.service.ShippingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
