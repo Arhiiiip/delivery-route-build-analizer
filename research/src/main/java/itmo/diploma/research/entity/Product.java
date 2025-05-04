@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.beans.ConstructorProperties;
+import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
@@ -16,6 +17,9 @@ public class Product {
     private String price;
     private Currency currency;
     private String url;
+    private String countyFrom;
+    private String countyTo;
+    private Long weight;
 
     @Override
     public String toString() {

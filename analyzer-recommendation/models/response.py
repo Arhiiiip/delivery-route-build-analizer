@@ -1,9 +1,10 @@
 from pydantic import BaseModel
 from typing import List
-from .entities import Product
+from models.entities import ProductWithRoutes
+
 
 class ProductRecommendation(BaseModel):
-    product: Product
+    product: ProductWithRoutes
     delivery_route: List[str]
     estimated_cost: float
     estimated_days: int
@@ -11,7 +12,7 @@ class ProductRecommendation(BaseModel):
     score: float
 
 class ProductResponse(BaseModel):
-    recommended_product: Product
+    recommended_product: ProductWithRoutes
     delivery_route: List[str]
     estimated_cost: float
     estimated_days: int

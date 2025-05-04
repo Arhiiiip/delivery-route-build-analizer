@@ -3,8 +3,10 @@ package itmo.diploma.research.controller;
 import itmo.diploma.research.dto.request.ProductSearchRequest;
 import itmo.diploma.research.entity.Product;
 import itmo.diploma.research.service.ProductSearchService;
-import org.json.JSONException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,7 +22,7 @@ public class ProductController {
     }
 
     @PostMapping("/search")
-    public List<Product> searchProducts(@RequestBody ProductSearchRequest request) throws IOException, InterruptedException {
+    public List<Product> searchProducts(@RequestBody ProductSearchRequest request) throws IOException {
         return productSearchService.searchProducts(request);
     }
 }

@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -25,19 +27,16 @@ public class ShippingService {
     @Autowired
     private SdekService sdekService;
 
-    public ShippingResponse findBestOffer(ShippingRequest request) {
-        BigDecimal dhlCost = dhlService.getShippingCost(request.getOrigin(), request.getDestination(), request.getWeight(), "dhl_api_key");
-        BigDecimal fedExCost = fedExService.getShippingCost(request.getOrigin(), request.getDestination(), request.getWeight(), "fedex_api_key");
-        BigDecimal sdekCost = sdekService.getShippingCost(request.getOrigin(), request.getDestination(), request.getWeight(), "sdek_api_key");
+    public List<ShippingResponse> findAllOffers(ShippingRequest request) {
+        List<ShippingResponse> dhlResponse = dhlService.getShippingCost(request.getCountyFrom(), request.getCountyTo(), request.getWeight(), "dhl_api_key");
+        List<ShippingResponse> fedExResponse = fedExService.getShippingCost(request.getCountyFrom(), request.getCountyTo(), request.getWeight(), "fedex_api_key");
+        List<ShippingResponse> sdekResponse = sdekService.getShippingCost(request.getCountyFrom(), request.getCountyTo(), request.getWeight(), "sdek_api_key");
 
-        Map<String, BigDecimal> offers = new HashMap<>();
-        offers.put("DHL", dhlCost);
-        offers.put("FedEx", fedExCost);
-        offers.put("СДЭК", sdekCost);
+        List<ShippingResponse> offers = new ArrayList<>();
+        offers.addAll(dhlResponse);
+        offers.addAll(fedExResponse);
+        offers.addAll(sdekResponse);
 
-        String bestCarrier = Collections.min(offers.entrySet(), Map.Entry.comparingByValue()).getKey();
-        BigDecimal bestCost = offers.get(bestCarrier);
-
-        return new ShippingResponse(bestCarrier, bestCost);
+        return offers;
     }
 }

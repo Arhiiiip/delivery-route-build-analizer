@@ -3,7 +3,7 @@ from transformers import AutoModel, AutoTokenizer
 import torch
 from typing import List
 
-from models.entities import Product
+from models.entities import ProductWithRoutes, Currency
 from models.request import ProductRequest
 from models.response import ProductResponse, ProductRecommendation
 
@@ -13,8 +13,8 @@ class ProductRecommendationService:
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModel.from_pretrained(model_name)
         self.embedding_size = 384
-        self.max_price = 10000.0
-        self.max_days = 14.0
+        self.max_cost = 10000.0
+        self.max_hours = 336.0
 
         self.price_keywords = {
             'дешевый', 'недорогой', 'цена', 'стоимость', 'бюджетный',
@@ -30,31 +30,42 @@ class ProductRecommendationService:
         priority = self.determine_priority(request.user_requirement.lower())
 
         scored_products = []
-        for product in request.products:
-            product_text = self.generate_product_text(product)
+        for product_with_routes in request.productsWithRoutes:
+            product_text = self.generate_product_text(product_with_routes)
             product_embedding = self.get_text_embedding(product_text)
             text_similarity = self.cosine_similarity(user_embedding, product_embedding)
 
-            cost = self.calculate_cost(product)
-            days = self.calculate_days(product)
-            normalized_cost = cost / self.max_price
-            normalized_days = days / self.max_days
+            cost_usd = self.convert_to_usd(product_with_routes.product)
+            hours = product_with_routes.hoursForDelivery
+            normalized_cost = cost_usd / self.max_cost
+            normalized_hours = hours / self.max_hours
 
             final_score = self.calculate_final_score(
                 text_similarity,
                 normalized_cost,
-                normalized_days,
+                normalized_hours,
                 priority
             )
 
-            # Отладочный вывод
-            print(f"Product: {product.name}, Price: {product.price}, Text Similarity: {text_similarity:.4f}, Normalized Cost: {normalized_cost:.4f}, Normalized Days: {normalized_days:.4f}, Final Score: {final_score:.4f}")
+            print(f"Product: {product_with_routes.product.name}, Cost: {cost_usd:.2f} USD, "
+                  f"Text Similarity: {text_similarity:.4f}, Normalized Cost: {normalized_cost:.4f}, "
+                  f"Normalized Hours: {normalized_hours:.4f}, Final Score: {final_score:.4f}")
 
-            scored_products.append(ProductScore(product, final_score, text_similarity, cost, days))
+            scored_products.append(ProductScore(
+                product_with_routes,
+                final_score,
+                text_similarity,
+                cost_usd,
+                hours
+            ))
 
         scored_products.sort(key=lambda x: x.final_score, reverse=True)
         best_product = scored_products[0]
         return self.build_response(best_product, scored_products, priority)
+
+    def convert_to_usd(self, product: 'Product') -> float:
+        price = float(product.price.replace(',', '.'))
+        return price
 
     def determine_priority(self, text: str) -> str:
         price_score = sum(1 for word in self.price_keywords if word in text)
@@ -64,17 +75,14 @@ class ProductRecommendationService:
             return "price"
         elif speed_score > price_score:
             return "speed"
-        else:
-            return "balanced"
+        return "balanced"
 
-    def calculate_final_score(self, text_similarity: float, cost: float, days: float, priority: str) -> float:
+    def calculate_final_score(self, text_similarity: float, cost: float, hours: float, priority: str) -> float:
         if priority == "price":
-            # Увеличиваем вес цены до 0.6
-            return (text_similarity * 0.3) + ((1 - cost) * 0.6) + ((1 - days) * 0.1)
+            return (text_similarity * 0.3) + ((1 - cost) * 0.6) + ((1 - hours) * 0.1)
         elif priority == "speed":
-            return (text_similarity * 0.3) + ((1 - days) * 0.6) + ((1 - cost) * 0.1)
-        else:
-            return (text_similarity * 0.6) + ((1 - cost) * 0.2) + ((1 - days) * 0.2)
+            return (text_similarity * 0.3) + ((1 - hours) * 0.6) + ((1 - cost) * 0.1)
+        return (text_similarity * 0.6) + ((1 - cost) * 0.2) + ((1 - hours) * 0.2)
 
     def get_text_embedding(self, text: str) -> torch.Tensor:
         inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True)
@@ -94,9 +102,9 @@ class ProductRecommendationService:
 
         response = ProductResponse(
             recommended_product=best_product.product,
-            delivery_route=self.calculate_route(best_product.product),
+            delivery_route=best_product.product.countryRoute,
             estimated_cost=best_product.cost,
-            estimated_days=best_product.days,
+            estimated_days=int(best_product.hours / 24),
             recommendation_reason=f"Лучшее соответствие ({priority_text}, текстовая схожесть: {best_product.text_similarity:.0%})",
             recommendations=[]
         )
@@ -106,17 +114,7 @@ class ProductRecommendationService:
 
         return response
 
-    def calculate_route(self, product: Product) -> List[str]:
-        return [product.origin_country, "Международный хаб", product.destination_country]
-
-    def calculate_cost(self, product: Product) -> float:
-        return product.price * 0.1
-
-    def calculate_days(self, product: Product) -> int:
-        return 3 if product.origin_country == product.destination_country else 7
-
     def create_recommendation(self, product_score: 'ProductScore', priority: str) -> ProductRecommendation:
-        product = product_score.product
         priority_text = {
             "price": "с упором на цену",
             "speed": "с упором на скорость",
@@ -124,21 +122,25 @@ class ProductRecommendationService:
         }.get(priority, "сбалансированный")
 
         return ProductRecommendation(
-            product=product,
-            delivery_route=self.calculate_route(product),
+            product=product_score.product,
+            delivery_route=product_score.product.countryRoute,
             estimated_cost=product_score.cost,
-            estimated_days=product_score.days,
+            estimated_days=int(product_score.hours / 24),
             recommendation_reason=f"Альтернатива ({priority_text}, текстовая схожесть: {product_score.text_similarity:.0%})",
             score=product_score.final_score
         )
 
-    def generate_product_text(self, product: Product) -> str:
-        return f"{product.name} {product.price:.2f} {product.origin_country} {product.destination_country}"
+    def generate_product_text(self, product_with_routes: ProductWithRoutes) -> str:
+        product = product_with_routes.product
+        return (f"{product.name} {product.price} {product.currency.name} "
+                f"{product.countryFrom} {product.countryTo} "
+                f"{product_with_routes.logisticCompanyName}")
 
 class ProductScore:
-    def __init__(self, product: Product, final_score: float, text_similarity: float, cost: float, days: int):
+    def __init__(self, product: ProductWithRoutes, final_score: float,
+                 text_similarity: float, cost: float, hours: int):
         self.product = product
         self.final_score = final_score
         self.text_similarity = text_similarity
         self.cost = cost
-        self.days = days
+        self.hours = hours

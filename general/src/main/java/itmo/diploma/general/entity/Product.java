@@ -2,6 +2,8 @@ package itmo.diploma.general.entity;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,6 +14,9 @@ public class Product {
     private String price;
     private Currency currency;
     private String url;
+    private String countyFrom;
+    private String countyTo;
+    private Long weight;
 
     @Override
     public String toString() {

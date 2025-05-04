@@ -3,15 +3,15 @@ package itmo.diploma.routebuilder.dto.request;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.Currency;
 
 @Data
 public class ShippingRequest {
-    private String origin;
-    private String destination;
-    private BigDecimal weight;
-    private String originCountry;
-    private String destinationCountry;
-    private String productType;
-    private BigDecimal productValue;
-    private String category;
+    private String name;
+    private String price;
+    private Currency currency;
+    private String url;
+    private String countyFrom;
+    private String countyTo;
+    private Long weight;
 }

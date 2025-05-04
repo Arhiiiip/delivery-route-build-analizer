@@ -1,7 +1,8 @@
 from pydantic import BaseModel
 from typing import List
-from .entities import Product
+from models.entities import ProductWithRoutes
+
 
 class ProductRequest(BaseModel):
     user_requirement: str
-    products: List[Product]
+    productsWithRoutes: List[ProductWithRoutes]
