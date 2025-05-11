@@ -14,8 +14,8 @@ public class Product {
     private String price;
     private Currency currency;
     private String url;
-    private String countyFrom;
-    private String countyTo;
+    private String countryFrom;
+    private String countryTo;
     private Long weight;
 
     @Override

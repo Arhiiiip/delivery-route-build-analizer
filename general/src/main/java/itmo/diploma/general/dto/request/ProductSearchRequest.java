@@ -1,5 +1,12 @@
 package itmo.diploma.general.dto.request;
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+@Data
+@Getter
+@Setter
 public class ProductSearchRequest {
     private String query;
     private String minPrice;

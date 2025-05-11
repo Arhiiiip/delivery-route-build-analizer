@@ -3,22 +3,17 @@ package itmo.diploma.general.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import itmo.diploma.general.dto.request.AnalizeRequest;
 import itmo.diploma.general.dto.request.ConvertedPriceRequest;
+import itmo.diploma.general.entity.Currency;
+import itmo.diploma.general.entity.Product;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
-
-import itmo.diploma.general.entity.Currency;
-import itmo.diploma.general.entity.Product;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 public class CurrencyConversionService {
@@ -28,11 +23,9 @@ public class CurrencyConversionService {
     private final ObjectMapper objectMapper;
     private final ExchangeRateService exchangeRateService;
 
-    @Autowired
-    public CurrencyConversionService(ExchangeRateService exchangeRateService, RestTemplate restTemplate) {
+    public CurrencyConversionService(ExchangeRateService exchangeRateService, ObjectMapper objectMapper) {
         this.exchangeRateService = exchangeRateService;
-        this.objectMapper = new ObjectMapper();
-
+        this.objectMapper = objectMapper;
     }
 
     public List<Product> processPriceRequest(AnalizeRequest request) throws IOException, InterruptedException {
@@ -43,12 +36,13 @@ public class CurrencyConversionService {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(API_URL))
                 .header("Content-Type", "application/json")
-                .POST(BodyPublishers.ofString(jsonRequest))
+                .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
                 .build();
 
-        HttpResponse<String> response = client.send(httpRequest, BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
-        List<Product> products = objectMapper.readValue(response.body(), objectMapper.getTypeFactory().constructCollectionType(List.class, Product.class));
+        List<Product> products = objectMapper.readValue(response.body(),
+                objectMapper.getTypeFactory().constructCollectionType(List.class, Product.class));
 
         return products;
     }
@@ -66,15 +60,15 @@ public class CurrencyConversionService {
             converted.setMaxPriceUsd(maxPrice);
             converted.setMinPriceRub(minPrice * exchangeRateService.getRate(Currency.USD, Currency.RUB));
             converted.setMaxPriceRub(maxPrice * exchangeRateService.getRate(Currency.USD, Currency.RUB));
-            converted.setMinPriceRub(minPrice * exchangeRateService.getRate(Currency.USD, Currency.EUR));
-            converted.setMaxPriceRub(maxPrice * exchangeRateService.getRate(Currency.USD, Currency.EUR));
+            converted.setMinPriceEur(minPrice * exchangeRateService.getRate(Currency.USD, Currency.EUR));
+            converted.setMaxPriceEur(maxPrice * exchangeRateService.getRate(Currency.USD, Currency.EUR));
         } else if (inputCurrency == Currency.RUB) {
             converted.setMinPriceRub(minPrice);
             converted.setMaxPriceRub(maxPrice);
             converted.setMinPriceUsd(minPrice * exchangeRateService.getRate(Currency.RUB, Currency.USD));
             converted.setMaxPriceUsd(maxPrice * exchangeRateService.getRate(Currency.RUB, Currency.USD));
-            converted.setMinPriceUsd(minPrice * exchangeRateService.getRate(Currency.RUB, Currency.EUR));
-            converted.setMaxPriceUsd(maxPrice * exchangeRateService.getRate(Currency.RUB, Currency.EUR));
+            converted.setMinPriceEur(minPrice * exchangeRateService.getRate(Currency.RUB, Currency.EUR));
+            converted.setMaxPriceEur(maxPrice * exchangeRateService.getRate(Currency.RUB, Currency.EUR));
         } else if (inputCurrency == Currency.EUR) {
             double usdRate = exchangeRateService.getRate(Currency.EUR, Currency.USD);
             double rubRate = exchangeRateService.getRate(Currency.EUR, Currency.RUB);

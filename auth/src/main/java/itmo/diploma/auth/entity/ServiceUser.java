@@ -2,6 +2,8 @@ package itmo.diploma.auth.entity;
 
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "service_users", uniqueConstraints = @UniqueConstraint(columnNames = {"login", "service_name"}))
 public class ServiceUser {
@@ -11,15 +13,15 @@ public class ServiceUser {
     private Long id;
 
     @Column(nullable = false)
-    private String login;
+    private String email;
 
-    @Column(name = "service_name", nullable = false)
-    private String serviceName;
+    @Column(nullable = false)
+    private UUID serviceId;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getLogin() { return login; }
-    public void setLogin(String login) { this.login = login; }
-    public String getServiceName() { return serviceName; }
-    public void setServiceName(String serviceName) { this.serviceName = serviceName; }
+    public String getEmail() { return email; }
+    public void setEmail(String login) { this.email = login; }
+    public UUID getServiceId() { return serviceId; }
+    public void setServiceId(UUID serviceId) { this.serviceId = serviceId; }
 }

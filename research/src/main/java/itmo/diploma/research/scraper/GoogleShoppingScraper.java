@@ -2,16 +2,18 @@ package itmo.diploma.research.scraper;
 
 import itmo.diploma.research.dto.request.ProductSearchRequest;
 
+import itmo.diploma.research.entity.Product;
 import org.json.JSONException;
 import java.net.*;
 import java.io.*;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class GoogleShoppingScraper {
-    public void scrapeProducts(ProductSearchRequest query) throws IOException, JSONException {
+    public List<Product> scrapeProducts(ProductSearchRequest query) throws IOException, JSONException {
         try {
             String apiKey = "";
             String country = "fr";
@@ -51,5 +53,6 @@ public class GoogleShoppingScraper {
         } catch (IOException e) {
             e.printStackTrace();
         }
+         return null;
     }
 }
