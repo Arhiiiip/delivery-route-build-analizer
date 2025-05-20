@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.ExecutionException;
+
 @RestController
 @RequestMapping("/delivery")
 public class DeliveryController {
@@ -19,7 +21,12 @@ public class DeliveryController {
 
     @GetMapping
     public ResponseEntity<DeliveryResponse> calculateRoute(@Valid @RequestBody DeliveryRequest request) {
-        DeliveryResponse response = routeEngine.findOptimalRoute(request);
+        DeliveryResponse response = null;
+        try {
+            response = routeEngine.findOptimalRoute(request);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(response);
     }
 }
