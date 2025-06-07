@@ -1,0 +1,199 @@
+openapi: 3.0.3
+info:
+  title: General API
+  version: 1.0.0
+  description: OpenAPI спецификация для GeneralController
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /getApiKey:
+    post:
+      summary: Получить API-ключ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiKeyRequest'
+      responses:
+        '200':
+          description: Успешно получен API-ключ
+          content:
+            text/plain:
+              schema:
+                type: string
+        '500':
+          description: Ошибка сервера
+
+  /createUser:
+    post:
+      summary: Создать пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '200':
+          description: Успешно создан пользователь
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        '500':
+          description: Ошибка сервера
+
+  /search:
+    post:
+      summary: Поиск продуктов
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: Результат поиска
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '500':
+          description: Ошибка сервера
+
+components:
+  schemas:
+    ApiKeyRequest:
+      type: object
+      properties:
+        companyName:
+          type: string
+      required:
+        - companyName
+
+    CreateUserRequest:
+      type: object
+      properties:
+        login:
+          type: string
+        apiKey:
+          type: string
+      required:
+        - login
+        - apiKey
+
+    SearchRequest:
+      type: object
+      properties:
+        query:
+          type: string
+        minPrice:
+          type: number
+          format: double
+        maxPrice:
+          type: number
+          format: double
+        currency:
+          $ref: '#/components/schemas/Currency'
+        apiKey:
+          type: string
+        loginUser:
+          type: string
+        companyName:
+          type: string
+        priority:
+          $ref: '#/components/schemas/Priority'
+        userRequirement:
+          type: string
+      required:
+        - query
+        - minPrice
+        - maxPrice
+        - currency
+        - apiKey
+        - loginUser
+        - companyName
+        - priority
+        - userRequirement
+
+    ProductResponse:
+      type: object
+      properties:
+        recommendedProduct:
+          $ref: '#/components/schemas/ProductWithRoutes'
+        deliveryRoute:
+          type: array
+          items:
+            type: string
+        estimatedCost:
+          type: number
+          format: float
+        estimatedDays:
+          type: integer
+        recommendationReason:
+          type: string
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductRecommendation'
+      required:
+        - recommendedProduct
+        - deliveryRoute
+        - estimatedCost
+        - estimatedDays
+        - recommendationReason
+        - recommendations
+
+    # Примерные схемы для вложенных сущностей:
+    ProductWithRoutes:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: double
+        currency:
+          $ref: '#/components/schemas/Currency'
+        availableRoutes:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - name
+        - price
+        - currency
+        - availableRoutes
+
+    ProductRecommendation:
+      type: object
+      properties:
+        productId:
+          type: integer
+        productName:
+          type: string
+        reason:
+          type: string
+      required:
+        - productId
+        - productName
+        - reason
+
+    # Примерные перечисления:
+    Currency:
+      type: string
+      enum: [RUB, USD, EUR] # Добавьте свои валюты, если нужно
+
+    Priority:
+      type: string
+      enum: [LOW, MEDIUM, HIGH] # Добавьте свои значения, если нужно
