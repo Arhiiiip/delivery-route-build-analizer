@@ -4,9 +4,6 @@ info:
   version: 1.0.0
   description: OpenAPI спецификация для GeneralController
 
-servers:
-  - url: http://localhost:8080
-
 paths:
   /getApiKey:
     post:
@@ -99,7 +96,8 @@ components:
           type: number
           format: double
         currency:
-          $ref: '#/components/schemas/Currency'
+          type: string
+          example: "RUB"
         apiKey:
           type: string
         loginUser:
@@ -107,7 +105,8 @@ components:
         companyName:
           type: string
         priority:
-          $ref: '#/components/schemas/Priority'
+          type: string
+          example: "HIGH"
         userRequirement:
           type: string
       required:
@@ -149,12 +148,63 @@ components:
         - recommendationReason
         - recommendations
 
-    # Примерные схемы для вложенных сущностей:
+    ProductRecommendation:
+      type: object
+      properties:
+        product:
+          $ref: '#/components/schemas/ProductWithRoutes'
+        deliveryRoute:
+          type: array
+          items:
+            type: string
+        estimatedCost:
+          type: number
+          format: float
+        estimatedDays:
+          type: integer
+        recommendationReason:
+          type: string
+        score:
+          type: number
+          format: float
+      required:
+        - product
+        - deliveryRoute
+        - estimatedCost
+        - estimatedDays
+        - recommendationReason
+        - score
+
     ProductWithRoutes:
+      type: object
+      properties:
+        product:
+          $ref: '#/components/schemas/Product'
+        countryRoute:
+          type: array
+          items:
+            type: string
+        cost:
+          type: integer
+          format: int64
+        logisticCompanyName:
+          type: string
+        hoursForDelivery:
+          type: integer
+          format: int64
+      required:
+        - product
+        - countryRoute
+        - cost
+        - logisticCompanyName
+        - hoursForDelivery
+
+    Product:
       type: object
       properties:
         id:
           type: integer
+          format: int64
         name:
           type: string
         description:
@@ -163,37 +213,10 @@ components:
           type: number
           format: double
         currency:
-          $ref: '#/components/schemas/Currency'
-        availableRoutes:
-          type: array
-          items:
-            type: string
+          type: string
+          example: "RUB"
       required:
         - id
         - name
         - price
         - currency
-        - availableRoutes
-
-    ProductRecommendation:
-      type: object
-      properties:
-        productId:
-          type: integer
-        productName:
-          type: string
-        reason:
-          type: string
-      required:
-        - productId
-        - productName
-        - reason
-
-    # Примерные перечисления:
-    Currency:
-      type: string
-      enum: [RUB, USD, EUR] # Добавьте свои валюты, если нужно
-
-    Priority:
-      type: string
-      enum: [LOW, MEDIUM, HIGH] # Добавьте свои значения, если нужно
