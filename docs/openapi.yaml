@@ -106,7 +106,6 @@ components:
           type: string
         priority:
           type: string
-          example: "HIGH"
         userRequirement:
           type: string
       required:
